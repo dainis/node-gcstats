@@ -1,7 +1,6 @@
 #include "node.h"
 #include "v8.h"
 #include "nan.h"
-#include <stdio.h>
 
 using namespace v8;
 
@@ -24,6 +23,7 @@ static NanCallback* afterGCCallback;
 
 static HeapStatistics beforeGCStats;
 uint64_t gcStartTime;
+GCType gctype;
 
 #if NODE_MODULE_VERSION >=14
 static void recordBeforeGC(Isolate*, GCType, GCCallbackFlags) {
@@ -80,6 +80,7 @@ static void asyncAfter(uv_work_t* work, int status) {
 		NanNew<Number>(static_cast<double>(data->gcEndTime - data->gcStartTime)));
 	obj->Set(NanSymbol("pauseMS"),
 		NanNew<Number>(static_cast<double>((data->gcEndTime - data->gcStartTime) / 1000000)));
+		obj->Set(NanSymbol("gctype"), NanNew<Number>(gctype));
 	obj->Set(NanSymbol("before"), beforeGCStats);
 	obj->Set(NanSymbol("after"), afterGCStats);
 	obj->Set(NanSymbol("diff"), diffStats);
@@ -99,16 +100,18 @@ static void asyncWork(uv_work_t* work) {
 }
 
 #if NODE_MODULE_VERSION >=14
-static void afterGC(Isolate*, GCType, GCCallbackFlags) {
+static void afterGC(Isolate*, GCType typ, GCCallbackFlags) {
 #else
-static void afterGC(GCType, GCCallbackFlags) {
+static void afterGC(GCType typ, GCCallbackFlags) {
 #endif
 	uv_work_t* work = new uv_work_t;
 
 	HeapData* data = new HeapData;
 	data->before = new HeapInfo;
 	data->after = new HeapInfo;
+  gctype = typ;
 	HeapStatistics stats;
+
 
 	NanGetHeapStatistics(&stats);
 
