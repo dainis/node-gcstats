@@ -17,6 +17,7 @@ This will print blobs like this whenever a GC happened:
     GC happened {
         pause: 433034,
         pauseMS: 0,
+        gctype: 1,
         before: {
             totalHeapSize: 18635008,
             totalHeapExecutableSize: 4194304,
@@ -34,6 +35,19 @@ This will print blobs like this whenever a GC happened:
             heapSizeLimit: 0
         }
     }
+
+## Property insights
+* totalHeapSize: Number of bytes V8 has allocated for the heap. This can grow if usedHeap needs more.
+* usedHeapSize: Number of bytes in use by application data
+* total HeapExecutableSize: Number of bytes for compiled bytecode and JITed code
+* heapSizeLimit: The absolute limit the heap cannot exceed
+* pause: Nanoseconds from start to end of GC using hrtime()
+* pauseMS: pause expressed in milliseconds
+
+gctype can have the following values:
+* 1: Scavenge (minor GC)
+* 2: Mark/Sweep/Compact (major GC)
+* 3: Both 1 and 2
 
 # Installation
 
