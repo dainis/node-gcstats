@@ -8,7 +8,7 @@
 		"install" : "node-gyp rebuild"
 	},
 	"dependencies" : {
-		"nan" : "~1.0.0"
+		"nan" : "~1.7.0"
 	},
 	"gypfile"     : true
 }
