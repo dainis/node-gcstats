@@ -38,7 +38,9 @@ static void recordBeforeGC(GCType, GCCallbackFlags) {
 static void copyHeapStats(HeapStatistics* stats, HeapInfo* info) {
 	info->totalHeapSize = stats->total_heap_size();
 	info->totalHeapExecutableSize = stats->total_heap_size_executable();
-	// info->totalPhysicalSize = stats->total_physical_size(); //total_physical_size is in headers but does not work wtf
+	#if NODE_MODULE_VERSION >= 14 //0.11+
+	info->totalPhysicalSize = stats->total_physical_size();
+	#endif
 	info->usedHeapSize = stats->used_heap_size();
 	info->heapSizeLimit = stats->heap_size_limit();
 }
@@ -48,6 +50,9 @@ static void formatStats(Handle<Object> obj, HeapInfo* info) {
 	obj->Set(NanNew<String>("totalHeapExecutableSize"), NanNew<Number>(info->totalHeapExecutableSize));
 	obj->Set(NanNew<String>("usedHeapSize"), NanNew<Number>(info->usedHeapSize));
 	obj->Set(NanNew<String>("heapSizeLimit"), NanNew<Number>(info->heapSizeLimit));
+	#if NODE_MODULE_VERSION >= 14
+	obj->Set(NanNew<String>("totalPhysicalSize"), NanNew<Number>(info->totalPhysicalSize));
+	#endif
 }
 
 static void formatStatDiff(Handle<Object> obj, HeapInfo* before, HeapInfo* after) {
@@ -59,6 +64,10 @@ static void formatStatDiff(Handle<Object> obj, HeapInfo* before, HeapInfo* after
 		static_cast<double>(after->usedHeapSize) - static_cast<double>(before->usedHeapSize)));
 	obj->Set(NanNew<String>("heapSizeLimit"), NanNew<Number>(
 		static_cast<double>(after->heapSizeLimit) - static_cast<double>(before->heapSizeLimit)));
+	#if NODE_MODULE_VERSION >= 14
+	obj->Set(NanNew<String>("totalPhysicalSize"), NanNew<Number>(
+		static_cast<double>(after->totalPhysicalSize) - static_cast<double>(before->totalPhysicalSize)));
+	#endif
 }
 
 static void asyncAfter(uv_work_t* work, int status) {

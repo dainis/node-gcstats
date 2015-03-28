@@ -41,6 +41,8 @@ This will print blobs like this whenever a GC happened:
 * usedHeapSize: Number of bytes in use by application data
 * total HeapExecutableSize: Number of bytes for compiled bytecode and JITed code
 * heapSizeLimit: The absolute limit the heap cannot exceed
+* totalPhysicalSize: Commited size (node 0.11+)
+* pause: Nanoseconds from start to end of GC using hrtime()
 * pause: Nanoseconds from start to end of GC using hrtime()
 * pauseMS: pause expressed in milliseconds
 
