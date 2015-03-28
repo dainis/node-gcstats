@@ -44,20 +44,20 @@ static void copyHeapStats(HeapStatistics* stats, HeapInfo* info) {
 }
 
 static void formatStats(Handle<Object> obj, HeapInfo* info) {
-	obj->Set(NanSymbol("totalHeapSize"), NanNew<Number>(info->totalHeapSize));
-	obj->Set(NanSymbol("totalHeapExecutableSize"), NanNew<Number>(info->totalHeapExecutableSize));
-	obj->Set(NanSymbol("usedHeapSize"), NanNew<Number>(info->usedHeapSize));
-	obj->Set(NanSymbol("heapSizeLimit"), NanNew<Number>(info->heapSizeLimit));
+	obj->Set(NanNew<String>("totalHeapSize"), NanNew<Number>(info->totalHeapSize));
+	obj->Set(NanNew<String>("totalHeapExecutableSize"), NanNew<Number>(info->totalHeapExecutableSize));
+	obj->Set(NanNew<String>("usedHeapSize"), NanNew<Number>(info->usedHeapSize));
+	obj->Set(NanNew<String>("heapSizeLimit"), NanNew<Number>(info->heapSizeLimit));
 }
 
 static void formatStatDiff(Handle<Object> obj, HeapInfo* before, HeapInfo* after) {
-	obj->Set(NanSymbol("totalHeapSize"), NanNew<Number>(
+	obj->Set(NanNew<String>("totalHeapSize"), NanNew<Number>(
 		static_cast<double>(after->totalHeapSize) - static_cast<double>(before->totalHeapSize)));
-	obj->Set(NanSymbol("totalHeapExecutableSize"), NanNew<Number>(
+	obj->Set(NanNew<String>("totalHeapExecutableSize"), NanNew<Number>(
 		static_cast<double>(after->totalHeapExecutableSize) - static_cast<double>(before->totalHeapExecutableSize)));
-	obj->Set(NanSymbol("usedHeapSize"), NanNew<Number>(
+	obj->Set(NanNew<String>("usedHeapSize"), NanNew<Number>(
 		static_cast<double>(after->usedHeapSize) - static_cast<double>(before->usedHeapSize)));
-	obj->Set(NanSymbol("heapSizeLimit"), NanNew<Number>(
+	obj->Set(NanNew<String>("heapSizeLimit"), NanNew<Number>(
 		static_cast<double>(after->heapSizeLimit) - static_cast<double>(before->heapSizeLimit)));
 }
 
@@ -76,14 +76,14 @@ static void asyncAfter(uv_work_t* work, int status) {
 	Handle<Object> diffStats = NanNew<Object>();
 	formatStatDiff(diffStats, data->before, data->after);
 
-	obj->Set(NanSymbol("pause"),
+	obj->Set(NanNew<String>("pause"),
 		NanNew<Number>(static_cast<double>(data->gcEndTime - data->gcStartTime)));
-	obj->Set(NanSymbol("pauseMS"),
+	obj->Set(NanNew<String>("pauseMS"),
 		NanNew<Number>(static_cast<double>((data->gcEndTime - data->gcStartTime) / 1000000)));
-		obj->Set(NanSymbol("gctype"), NanNew<Number>(gctype));
-	obj->Set(NanSymbol("before"), beforeGCStats);
-	obj->Set(NanSymbol("after"), afterGCStats);
-	obj->Set(NanSymbol("diff"), diffStats);
+		obj->Set(NanNew<String>("gctype"), NanNew<Number>(gctype));
+	obj->Set(NanNew<String>("before"), beforeGCStats);
+	obj->Set(NanNew<String>("after"), afterGCStats);
+	obj->Set(NanNew<String>("diff"), diffStats);
 
 	Handle<Value> arguments[] = {obj};
 
@@ -153,7 +153,7 @@ void init(Handle<Object> exports) {
 	V8::AddGCPrologueCallback(recordBeforeGC);
 #endif
 
-	exports->Set(NanSymbol("afterGC"), NanNew<FunctionTemplate>(AfterGC)->GetFunction());
+	exports->Set(NanNew<String>("afterGC"), NanNew<FunctionTemplate>(AfterGC)->GetFunction());
 }
 
 NODE_MODULE(gcstats, init)
