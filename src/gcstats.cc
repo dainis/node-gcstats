@@ -1,6 +1,4 @@
-#include "node.h"
-#include "v8.h"
-#include "nan.h"
+#include <nan.h>
 
 using namespace v8;
 
@@ -19,82 +17,78 @@ struct HeapData {
 	uint64_t gcEndTime;
 };
 
-static NanCallback* afterGCCallback;
+static Nan::Callback* afterGCCallback;
 
 static HeapStatistics beforeGCStats;
 uint64_t gcStartTime;
 GCType gctype;
 
-#if NODE_MODULE_VERSION >=14
-static void recordBeforeGC(Isolate*, GCType, GCCallbackFlags) {
-#else
-static void recordBeforeGC(GCType, GCCallbackFlags) {
-#endif
+static NAN_GC_CALLBACK(recordBeforeGC) {
 	//Docs say that new objects should not be created
 	gcStartTime = uv_hrtime();
-	NanGetHeapStatistics(&beforeGCStats);
+	Nan::GetHeapStatistics(&beforeGCStats);
 }
 
 static void copyHeapStats(HeapStatistics* stats, HeapInfo* info) {
 	info->totalHeapSize = stats->total_heap_size();
 	info->totalHeapExecutableSize = stats->total_heap_size_executable();
-	#if NODE_MODULE_VERSION >= 14 //0.11+
+	#if NODE_MODULE_VERSION >= NODE_0_12_MODULE_VERSION
 	info->totalPhysicalSize = stats->total_physical_size();
 	#endif
 	info->usedHeapSize = stats->used_heap_size();
 	info->heapSizeLimit = stats->heap_size_limit();
 }
 
-static void formatStats(Handle<Object> obj, HeapInfo* info) {
-	obj->Set(NanNew<String>("totalHeapSize"), NanNew<Number>(info->totalHeapSize));
-	obj->Set(NanNew<String>("totalHeapExecutableSize"), NanNew<Number>(info->totalHeapExecutableSize));
-	obj->Set(NanNew<String>("usedHeapSize"), NanNew<Number>(info->usedHeapSize));
-	obj->Set(NanNew<String>("heapSizeLimit"), NanNew<Number>(info->heapSizeLimit));
-	#if NODE_MODULE_VERSION >= 14
-	obj->Set(NanNew<String>("totalPhysicalSize"), NanNew<Number>(info->totalPhysicalSize));
+static void formatStats(Local<Object> obj, HeapInfo* info) {
+	Nan::Set(obj, Nan::New("totalHeapSize").ToLocalChecked(), Nan::New<Number>(info->totalHeapSize));
+	Nan::Set(obj, Nan::New("totalHeapExecutableSize").ToLocalChecked(), Nan::New<Number>(info->totalHeapExecutableSize));
+	Nan::Set(obj, Nan::New("usedHeapSize").ToLocalChecked(), Nan::New<Number>(info->usedHeapSize));
+	Nan::Set(obj, Nan::New("heapSizeLimit").ToLocalChecked(), Nan::New<Number>(info->heapSizeLimit));
+	#if NODE_MODULE_VERSION >= NODE_0_12_MODULE_VERSION
+	Nan::Set(obj, Nan::New("totalPhysicalSize").ToLocalChecked(), Nan::New<Number>(info->totalPhysicalSize));
 	#endif
 }
 
-static void formatStatDiff(Handle<Object> obj, HeapInfo* before, HeapInfo* after) {
-	obj->Set(NanNew<String>("totalHeapSize"), NanNew<Number>(
+static void formatStatDiff(Local<Object> obj, HeapInfo* before, HeapInfo* after) {
+	Nan::Set(obj, Nan::New("totalHeapSize").ToLocalChecked(), Nan::New<Number>(
 		static_cast<double>(after->totalHeapSize) - static_cast<double>(before->totalHeapSize)));
-	obj->Set(NanNew<String>("totalHeapExecutableSize"), NanNew<Number>(
+	Nan::Set(obj, Nan::New("totalHeapExecutableSize").ToLocalChecked(), Nan::New<Number>(
 		static_cast<double>(after->totalHeapExecutableSize) - static_cast<double>(before->totalHeapExecutableSize)));
-	obj->Set(NanNew<String>("usedHeapSize"), NanNew<Number>(
+	Nan::Set(obj, Nan::New("usedHeapSize").ToLocalChecked(), Nan::New<Number>(
 		static_cast<double>(after->usedHeapSize) - static_cast<double>(before->usedHeapSize)));
-	obj->Set(NanNew<String>("heapSizeLimit"), NanNew<Number>(
+	Nan::Set(obj, Nan::New("heapSizeLimit").ToLocalChecked(), Nan::New<Number>(
 		static_cast<double>(after->heapSizeLimit) - static_cast<double>(before->heapSizeLimit)));
-	#if NODE_MODULE_VERSION >= 14
-	obj->Set(NanNew<String>("totalPhysicalSize"), NanNew<Number>(
+	#if NODE_MODULE_VERSION >= NODE_0_12_MODULE_VERSION
+	Nan::Set(obj, Nan::New("totalPhysicalSize").ToLocalChecked(), Nan::New<Number>(
 		static_cast<double>(after->totalPhysicalSize) - static_cast<double>(before->totalPhysicalSize)));
 	#endif
 }
 
 static void asyncAfter(uv_work_t* work, int status) {
-	NanScope();
+	Nan::HandleScope scope;
 
 	HeapData* data = static_cast<HeapData*>(work->data);
 
-	Handle<Object> obj = NanNew<Object>();
-	Handle<Object> beforeGCStats = NanNew<Object>();
-	Handle<Object> afterGCStats = NanNew<Object>();
+	Local<Object> obj = Nan::New<Object>();
+	Local<Object> beforeGCStats = Nan::New<Object>();
+	Local<Object> afterGCStats = Nan::New<Object>();
 
 	formatStats(beforeGCStats, data->before);
 	formatStats(afterGCStats, data->after);
 
-	Handle<Object> diffStats = NanNew<Object>();
+	Local<Object> diffStats = Nan::New<Object>();
 	formatStatDiff(diffStats, data->before, data->after);
 
-	obj->Set(NanNew<String>("pause"),
-		NanNew<Number>(static_cast<double>(data->gcEndTime - data->gcStartTime)));
-	obj->Set(NanNew<String>("pauseMS"),
-		NanNew<Number>(static_cast<double>((data->gcEndTime - data->gcStartTime) / 1000000)));
-		obj->Set(NanNew<String>("gctype"), NanNew<Number>(gctype));
-	obj->Set(NanNew<String>("before"), beforeGCStats);
-	obj->Set(NanNew<String>("after"), afterGCStats);
-	obj->Set(NanNew<String>("diff"), diffStats);
+	Nan::Set(obj, Nan::New("pause").ToLocalChecked(),
+		Nan::New<Number>(static_cast<double>(data->gcEndTime - data->gcStartTime)));
+	Nan::Set(obj, Nan::New("pauseMS").ToLocalChecked(),
+		Nan::New<Number>(static_cast<double>((data->gcEndTime - data->gcStartTime) / 1000000)));
+	Nan::Set(obj, Nan::New("gctype").ToLocalChecked(), Nan::New<Number>(gctype));
+	Nan::Set(obj, Nan::New("before").ToLocalChecked(), beforeGCStats);
+	Nan::Set(obj, Nan::New("after").ToLocalChecked(), afterGCStats);
+	Nan::Set(obj, Nan::New("diff").ToLocalChecked(), diffStats);
 
-	Handle<Value> arguments[] = {obj};
+	Local<Value> arguments[] = {obj};
 
 	afterGCCallback->Call(1, arguments);
 
@@ -108,21 +102,17 @@ static void asyncWork(uv_work_t* work) {
 	//can't create V8 objects here because this is different thread?
 }
 
-#if NODE_MODULE_VERSION >=14
-static void afterGC(Isolate*, GCType typ, GCCallbackFlags) {
-#else
-static void afterGC(GCType typ, GCCallbackFlags) {
-#endif
+NAN_GC_CALLBACK(afterGC) {
 	uv_work_t* work = new uv_work_t;
 
 	HeapData* data = new HeapData;
 	data->before = new HeapInfo;
 	data->after = new HeapInfo;
-  gctype = typ;
+	gctype = type;
 	HeapStatistics stats;
 
 
-	NanGetHeapStatistics(&stats);
+	Nan::GetHeapStatistics(&stats);
 
 	data->gcEndTime = uv_hrtime();
 	data->gcStartTime = gcStartTime;
@@ -136,33 +126,24 @@ static void afterGC(GCType typ, GCCallbackFlags) {
 }
 
 static NAN_METHOD(AfterGC) {
-	NanScope();
-
-	if(args.Length() != 1 || !args[0]->IsFunction()) {
-		return NanThrowError("Callback is required");
+	if(info.Length() != 1 || !info[0]->IsFunction()) {
+		return Nan::ThrowError("Callback is required");
 	}
 
-	Local<Function> callbackHandle = args[0].As<Function>();
-	afterGCCallback = new NanCallback(callbackHandle);
+	Local<Function> callbackHandle = info[0].As<Function>();
+	afterGCCallback = new Nan::Callback(callbackHandle);
 
-#if NODE_MODULE_VERSION >=14
-	NanAddGCEpilogueCallback(afterGC);
-#else
-	V8::AddGCEpilogueCallback(afterGC);
-#endif
-
-	NanReturnUndefined();
+	Nan::AddGCEpilogueCallback(afterGC);
 }
 
-void init(Handle<Object> exports) {
-	NanScope();
-#if NODE_MODULE_VERSION >=14
-	NanAddGCPrologueCallback(recordBeforeGC);
-#else
-	V8::AddGCPrologueCallback(recordBeforeGC);
-#endif
+NAN_MODULE_INIT(init) {
+	Nan::HandleScope scope;
+	Nan::AddGCPrologueCallback(recordBeforeGC);
 
-	exports->Set(NanNew<String>("afterGC"), NanNew<FunctionTemplate>(AfterGC)->GetFunction());
+	Nan::Set(target,
+		Nan::New("afterGC").ToLocalChecked(),
+		Nan::GetFunction(
+			Nan::New<FunctionTemplate>(AfterGC)).ToLocalChecked());
 }
 
 NODE_MODULE(gcstats, init)
