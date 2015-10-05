@@ -4,7 +4,7 @@ var GCStats = require('../'),
 	topLevelKeys = ['pause', 'pauseMS', 'gctype', 'before', 'after', 'diff'],
 	entryKeys = ['totalHeapSize', 'usedHeapSize', 'totalHeapExecutableSize', 'heapSizeLimit'];
 
-if(semver.gte(semver.clean(process.version)), '0.11.0') {
+if(semver.gte(semver.clean(process.version), '0.11.0')) {
 	entryKeys.push('totalPhysicalSize'); //this v8 property became available with node 0.11+
 }
 
