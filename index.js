@@ -1,5 +1,5 @@
 var gcEmitter,
-	gcstats = require('./build/Release/gcstats'),
+	gcstats = require('bindings')('gcstats.node'),
 	EventEmitter = require('events').EventEmitter;
 
 function gcStats() {
