@@ -1,21 +1,19 @@
 var gcEmitter,
-	util = require('util'),
 	gcstats = require('./build/Release/gcstats'),
 	EventEmitter = require('events').EventEmitter;
 
-function GCStats() {
+function gcStats() {
+	if (this instanceof gcStats){
+        	throw Error('gc-stats no longer exports a constructor. Call without the `new` keyword');
+   	}
 	if(!gcEmitter) {
 		gcEmitter = new EventEmitter();
 		gcstats.afterGC(function(stats) {
 			gcEmitter.emit('data', stats);
+			gcEmitter.emit('stats', stats);
 		});
 	}
-
-	EventEmitter.call(this);
-
-	gcEmitter.on('data', this.emit.bind(this, 'stats'));
+	return gcEmitter;
 }
 
-util.inherits(GCStats, EventEmitter);
-
-module.exports = GCStats;
+module.exports = gcStats;
