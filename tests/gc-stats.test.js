@@ -12,7 +12,7 @@ describe('gc-stats', function() {
 	var gcStats;
 
 	beforeEach(function() {
-		gcStats = new GCStats();
+		gcStats = GCStats();
 	});
 
 	it('should emit stats event with object containing gc stats', function(done) {
