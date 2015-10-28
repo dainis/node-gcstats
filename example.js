@@ -1,4 +1,4 @@
-var stats = new (require('./index'))();
+var stats = (require('./index'))();
 
 stats.on('stats', function(stats) {
 	console.log(stats);

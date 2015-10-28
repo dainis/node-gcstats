@@ -7,7 +7,7 @@ Exposes stats about V8 GC after it has been executed.
 
 Create a new instance of the module and subscribe to `stats`-events from that:
 
-    var gc = new (require('gc-stats'))();
+    var gc = (require('gc-stats'))();
 
     gc.on('stats', function (stats) {
         console.log('GC happened', stats);
