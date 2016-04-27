@@ -6,6 +6,7 @@ node_js:
     - "stable"
     - "5"
     - "4"
+    - "6"
 
 env:
     - CXX=g++-4.8
