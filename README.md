@@ -46,11 +46,12 @@ This will print blobs like this whenever a GC happened:
 * pause: Nanoseconds from start to end of GC using hrtime()
 * pause: Nanoseconds from start to end of GC using hrtime()
 * pauseMS: pause expressed in milliseconds
-
-gctype can have the following values:
-* 1: Scavenge (minor GC)
-* 2: Mark/Sweep/Compact (major GC)
-* 3: Both 1 and 2
+* gctype can have the following values([v8 source](https://github.com/nodejs/node/blob/master/deps/v8/include/v8.h#L5165-L5172)):
+ * 1: Scavenge (minor GC)
+ * 2: Mark/Sweep/Compact (major GC)
+ * 4: Incremental marking
+ * 8: Weak/Phantom callback processing
+ * 15: All
 
 # Installation
 
