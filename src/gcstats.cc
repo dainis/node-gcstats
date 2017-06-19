@@ -8,23 +8,25 @@ struct HeapInfo {
 	size_t totalPhysicalSize;
 	size_t usedHeapSize;
 	size_t heapSizeLimit;
+	size_t totalAvailableSize;
+	size_t mallocedMemory;
+	size_t peakMallocedMemory;
 };
 
 struct HeapData {
-	HeapInfo* before;
-	HeapInfo* after;
-	uint64_t gcStartTime;
-	uint64_t gcEndTime;
+	HeapInfo*  before;
+	HeapInfo*  after;
+	uint64_t   gcStartTime;
+	uint64_t   gcEndTime;
+	int        gctype;
 };
 
 static Nan::Callback* afterGCCallback;
 
 static HeapStatistics beforeGCStats;
 uint64_t gcStartTime;
-GCType gctype;
 
 static NAN_GC_CALLBACK(recordBeforeGC) {
-	//Docs say that new objects should not be created
 	gcStartTime = uv_hrtime();
 	Nan::GetHeapStatistics(&beforeGCStats);
 }
@@ -32,11 +34,21 @@ static NAN_GC_CALLBACK(recordBeforeGC) {
 static void copyHeapStats(HeapStatistics* stats, HeapInfo* info) {
 	info->totalHeapSize = stats->total_heap_size();
 	info->totalHeapExecutableSize = stats->total_heap_size_executable();
+	info->usedHeapSize = stats->used_heap_size();
+	info->heapSizeLimit = stats->heap_size_limit();
+
 	#if NODE_MODULE_VERSION >= NODE_0_12_MODULE_VERSION
 	info->totalPhysicalSize = stats->total_physical_size();
 	#endif
-	info->usedHeapSize = stats->used_heap_size();
-	info->heapSizeLimit = stats->heap_size_limit();
+
+	#if NODE_MODULE_VERSION >= NODE_4_0_MODULE_VERSION
+	info->totalAvailableSize = stats->total_available_size();
+	#endif
+
+	#if NODE_MODULE_VERSION >= NODE_7_0_MODULE_VERSION
+	info->mallocedMemory = stats->malloced_memory();
+	info->peakMallocedMemory = stats->peak_malloced_memory();
+	#endif
 }
 
 static void formatStats(Local<Object> obj, HeapInfo* info) {
@@ -44,8 +56,18 @@ static void formatStats(Local<Object> obj, HeapInfo* info) {
 	Nan::Set(obj, Nan::New("totalHeapExecutableSize").ToLocalChecked(), Nan::New<Number>(info->totalHeapExecutableSize));
 	Nan::Set(obj, Nan::New("usedHeapSize").ToLocalChecked(), Nan::New<Number>(info->usedHeapSize));
 	Nan::Set(obj, Nan::New("heapSizeLimit").ToLocalChecked(), Nan::New<Number>(info->heapSizeLimit));
+
 	#if NODE_MODULE_VERSION >= NODE_0_12_MODULE_VERSION
 	Nan::Set(obj, Nan::New("totalPhysicalSize").ToLocalChecked(), Nan::New<Number>(info->totalPhysicalSize));
+	#endif
+
+	#if NODE_MODULE_VERSION >= NODE_4_0_MODULE_VERSION
+	Nan::Set(obj, Nan::New("totalAvailableSize").ToLocalChecked(), Nan::New<Number>(info->totalAvailableSize));
+	#endif
+
+	#if NODE_MODULE_VERSION >= NODE_7_0_MODULE_VERSION
+	Nan::Set(obj, Nan::New("mallocedMemory").ToLocalChecked(), Nan::New<Number>(info->mallocedMemory));
+	Nan::Set(obj, Nan::New("peakMallocedMemory").ToLocalChecked(), Nan::New<Number>(info->peakMallocedMemory));
 	#endif
 }
 
@@ -58,16 +80,33 @@ static void formatStatDiff(Local<Object> obj, HeapInfo* before, HeapInfo* after)
 		static_cast<double>(after->usedHeapSize) - static_cast<double>(before->usedHeapSize)));
 	Nan::Set(obj, Nan::New("heapSizeLimit").ToLocalChecked(), Nan::New<Number>(
 		static_cast<double>(after->heapSizeLimit) - static_cast<double>(before->heapSizeLimit)));
+
 	#if NODE_MODULE_VERSION >= NODE_0_12_MODULE_VERSION
 	Nan::Set(obj, Nan::New("totalPhysicalSize").ToLocalChecked(), Nan::New<Number>(
 		static_cast<double>(after->totalPhysicalSize) - static_cast<double>(before->totalPhysicalSize)));
 	#endif
+
+	#if NODE_MODULE_VERSION >= NODE_4_0_MODULE_VERSION
+	Nan::Set(obj, Nan::New("totalAvailableSize").ToLocalChecked(), Nan::New<Number>(
+		static_cast<double>(after->totalAvailableSize) - static_cast<double>(before->totalAvailableSize)));
+	#endif
+
+	#if NODE_MODULE_VERSION >= NODE_7_0_MODULE_VERSION
+	Nan::Set(obj, Nan::New("mallocedMemory").ToLocalChecked(), Nan::New<Number>(
+		static_cast<double>(after->mallocedMemory) - static_cast<double>(before->mallocedMemory)));
+	Nan::Set(obj, Nan::New("peakMallocedMemory").ToLocalChecked(), Nan::New<Number>(
+		static_cast<double>(after->peakMallocedMemory) - static_cast<double>(before->peakMallocedMemory)));
+	#endif
 }
 
-static void asyncAfter(uv_work_t* work, int status) {
+static void closeCB(uv_handle_t *handle) {
+	delete handle;
+}
+
+static void asyncCB(uv_async_t *handle) {
 	Nan::HandleScope scope;
 
-	HeapData* data = static_cast<HeapData*>(work->data);
+	HeapData* data = static_cast<HeapData*>(handle->data);
 
 	Local<Object> obj = Nan::New<Object>();
 	Local<Object> beforeGCStats = Nan::New<Object>();
@@ -83,7 +122,7 @@ static void asyncAfter(uv_work_t* work, int status) {
 		Nan::New<Number>(static_cast<double>(data->gcEndTime - data->gcStartTime)));
 	Nan::Set(obj, Nan::New("pauseMS").ToLocalChecked(),
 		Nan::New<Number>(static_cast<double>((data->gcEndTime - data->gcStartTime) / 1000000)));
-	Nan::Set(obj, Nan::New("gctype").ToLocalChecked(), Nan::New<Number>(gctype));
+	Nan::Set(obj, Nan::New("gctype").ToLocalChecked(), Nan::New<Number>(data->gctype));
 	Nan::Set(obj, Nan::New("before").ToLocalChecked(), beforeGCStats);
 	Nan::Set(obj, Nan::New("after").ToLocalChecked(), afterGCStats);
 	Nan::Set(obj, Nan::New("diff").ToLocalChecked(), diffStats);
@@ -95,22 +134,19 @@ static void asyncAfter(uv_work_t* work, int status) {
 	delete data->before;
 	delete data->after;
 	delete data;
-	delete work;
-}
 
-static void asyncWork(uv_work_t* work) {
-	//can't create V8 objects here because this is different thread?
+	uv_close((uv_handle_t*) handle, closeCB);
 }
 
 NAN_GC_CALLBACK(afterGC) {
-	uv_work_t* work = new uv_work_t;
+	uv_async_t *async = new uv_async_t;
 
 	HeapData* data = new HeapData;
 	data->before = new HeapInfo;
 	data->after = new HeapInfo;
-	gctype = type;
-	HeapStatistics stats;
+	data->gctype = type;
 
+	HeapStatistics stats;
 
 	Nan::GetHeapStatistics(&stats);
 
@@ -120,9 +156,10 @@ NAN_GC_CALLBACK(afterGC) {
 	copyHeapStats(&beforeGCStats, data->before);
 	copyHeapStats(&stats, data->after);
 
-	work->data = data;
+	async->data = data;
 
-	uv_queue_work(uv_default_loop(), work, asyncWork, asyncAfter);
+	uv_async_init(uv_default_loop(), async, asyncCB);
+	uv_async_send(async);
 }
 
 static NAN_METHOD(AfterGC) {

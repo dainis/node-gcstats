@@ -42,10 +42,12 @@ This will print blobs like this whenever a GC happened:
 * usedHeapSize: Number of bytes in use by application data
 * total HeapExecutableSize: Number of bytes for compiled bytecode and JITed code
 * heapSizeLimit: The absolute limit the heap cannot exceed
-* totalPhysicalSize: Commited size (node 0.11+)
+* totalPhysicalSize: Committed size (node 0.11+)
+* totalAvailableSize: Available heap size(node 4+)
+
 * pause: Nanoseconds from start to end of GC using hrtime()
 * pauseMS: pause expressed in milliseconds
-* gctype can have the following values([v8 source](https://github.com/nodejs/node/blob/master/deps/v8/include/v8.h#L5165-L5172)):
+* gctype can have the following values([v8 source](https://github.com/nodejs/node/blob/554fa24916c5c6d052b51c5cee9556b76489b3f7/deps/v8/include/v8.h#L6137-L6144)):
  * 1: Scavenge (minor GC)
  * 2: Mark/Sweep/Compact (major GC)
  * 4: Incremental marking

@@ -7,16 +7,17 @@
   "license": "Unlicense",
   "scripts": {
     "install": "node-gyp rebuild",
-    "test": "./node_modules/mocha/bin/mocha --expose-gc ./tests"
+    "test": "./node_modules/mocha/bin/mocha --expose-gc ./tests",
+    "example" : "node --expose-gc ./example.js"
   },
   "dependencies": {
     "bindings": "^1.2.1",
-    "nan": "^2.0.5"
+    "nan": "^2.6.2"
   },
   "gypfile": true,
   "devDependencies": {
-    "mocha": "^2.3.3",
-    "semver": "^5.0.3",
+    "mocha": "^2.5.3",
+    "semver": "^5.3.0",
     "should": "^7.1.0"
   }
 }
