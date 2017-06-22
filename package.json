@@ -1,6 +1,6 @@
 {
   "name": "gc-stats",
-  "version": "1.0.1",
+  "version": "1.0.2",
   "description": "Exposes node v8 garbage collection stats",
   "main": "index.js",
   "repository": "git@github.com:dainis/node-gcstats.git",
@@ -9,18 +9,31 @@
     "node": ">=0.12"
   },
   "scripts": {
-    "install": "node-gyp rebuild",
-    "test": "./node_modules/mocha/bin/mocha --expose-gc ./tests",
-    "example": "node --expose-gc ./example.js"
+    "install": "node-pre-gyp install --fallback-to-build",
+    "test": "mocha --expose-gc tests",
+    "example": "node --expose-gc example.js",
+    "prepublish": "npm ls"
   },
   "dependencies": {
-    "bindings": "^1.2.1",
-    "nan": "^2.6.2"
+    "nan": "^2.6.2",
+    "node-pre-gyp": "^0.6.36"
   },
   "gypfile": true,
   "devDependencies": {
+    "aws-sdk": "^2.75.0",
     "mocha": "^2.5.3",
+    "node-gyp": "^3.6.2",
     "semver": "^5.3.0",
     "should": "^7.1.0"
+  },
+  "bundledDependencies": [
+    "node-pre-gyp"
+  ],
+  "binary": {
+    "module_name": "gcstats",
+    "module_path": "./build/{module_name}/v{version}/{configuration}/{node_abi}-{platform}-{arch}/",
+    "remote_path": "./{module_name}/v{version}/{configuration}/",
+    "package_name": "{node_abi}-{platform}-{arch}.tar.gz",
+    "host": "https://node-binaries.s3.amazonaws.com"
   }
 }

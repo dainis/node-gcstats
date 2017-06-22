@@ -1,0 +1,44 @@
+#https://github.com/mapbox/ci-scripts
+
+# This variable requests the highest version of
+# Visual Studio to be installed. Previous versions
+# will also be available and work. So, choosing 2015 here makes
+# available both `msvs_toolset: 12` (from Visual Studio 2013)
+# and `msvs_toolset: 14` (from Visual Studio 2015)
+# Note/TODO: it is not yet confirmed that earlier versions work with the the `Visual Studio 2017` os image.
+os: Visual Studio 2015
+
+platform:
+  - x86
+  - x64
+
+environment:
+  node_pre_gyp_accessKeyId:
+    secure: 2ICQ4vp8BEstug5ZrRy5ynnIqLlvK5R6EfLC09P0LIQ=
+  node_pre_gyp_secretAccessKey:
+    secure: HYbeKrr1nX4D3a2aFmWv+qcyh3+q8wGM+mRtLdbMiUuGGPhfJw/N253915UPSGjx
+  matrix:
+    - nodejs_version: 0.12
+      msvs_toolset: 12
+    - nodejs_version: 4
+      msvs_toolset: 12
+    - nodejs_version: 5
+      msvs_toolset: 12
+    - nodejs_version: 6
+      msvs_toolset: 12
+    - nodejs_version: 7
+      msvs_toolset: 12
+    - nodejs_version: 8
+      msvs_toolset: 12
+
+
+install:
+  - ps: Start-FileDownload 'https://github.com/mapbox/ci-scripts/raw/v1.1.0/node/ci-cpp.bat' -FileName ci.bat
+  - CALL ci.bat
+
+build: OFF
+test: OFF
+deploy: OFF
+
+skip_commits:
+  message: /\[skip appvyeor\]/

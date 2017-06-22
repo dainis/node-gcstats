@@ -1,5 +1,5 @@
 # GCStats
-[![Build Status](https://travis-ci.org/dainis/node-gcstats.svg?branch=master)](https://travis-ci.org/dainis/node-gcstats)
+[![Build Status](https://travis-ci.org/dainis/node-gcstats.svg?branch=master)](https://travis-ci.org/dainis/node-gcstats) [![Build status](https://ci.appveyor.com/api/projects/status/oeu171tgxbsac88q/branch/master?svg=true)](https://ci.appveyor.com/project/dainis/node-gcstats/branch/master)
 
 Exposes stats about V8 GC after it has been executed.
 
