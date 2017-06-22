@@ -27,6 +27,7 @@ describe('gc-stats', function() {
 				});
 			});
 
+			gcStats.removeAllListeners();
 			done();
 		});
 
