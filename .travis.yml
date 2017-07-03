@@ -1,18 +1,19 @@
 language: node_js
+
 node_js:
-    - "0.11"
-    - "0.12"
-    - "4"
-    - "5"
-    - "6"
-    - "8"
-    - "stable"
+- "0.11"
+- "0.12"
+- "4"
+- "5"
+- "6"
+- "8"
 
 env:
-    - CXX=g++-4.8
-
-before_install:
-  - if echo "$TRAVIS_COMMIT_MESSAGE" | grep -F -q "[skip travis]" ; then echo "[skip travis] has been found, exiting" && exit 0 ; else echo "[skip travis] has not been found, continuing" ; fi
+  matrix:
+  - CXX=g++-4.8
+  global:
+  - secure: jczVFyYpDneWRFonk5M1eu8nQ6D/Mmc97zq72a+vxyZGOlS5mw0iShJgTJ0gRqmolx3/wSWEEyTJEiDKcXRg/NmpFnSevD+pA3pYQVYxlk7aYrJUGDSF5l/0QsCxhvc7rou61z8biTx2575zzyqokB18KTJeLh7qxGXFe6b/FQQ=
+  - secure: XjkMU0jsr20zPanIGr10syio9KMmO1HO6JAAEv7d8sP7y+W20GZZ+fKSvZaTZetdgVxzZcwjeoKGVBSZb/4XDZr9JgtmDAoR8UPsZIzMUv1/+b7VprzBypt36T2bcOfsOEtiRj+Sg+fAzpsBixr/1x4gJSbrOAqtc9/abbz+PRE=
 
 addons:
   apt:
@@ -20,3 +21,28 @@ addons:
     - ubuntu-toolchain-r-test
     packages:
     - g++-4.8
+
+before_install:
+- if echo "$TRAVIS_COMMIT_MESSAGE" | grep -F -q "[skip travis]" ; then echo "[skip
+  travis] has been found, exiting" && exit 0 ; else echo "[skip travis] has not been
+  found, continuing" ; fi
+- if test "${TRAVIS_COMMIT_MESSAGE#*'[publish binary]'}" != "$TRAVIS_COMMIT_MESSAGE"; then PUBLISH_BINARY=true; fi;
+- export PATH=./node_modules/.bin/:$PATH
+
+install:
+- npm install --build-from-source
+- npm test
+
+before_script:
+- if [[ $PUBLISH_BINARY == true ]]; then node-pre-gyp package publish; fi;
+- node-pre-gyp clean
+- node-gyp clean
+
+script:
+- INSTALL_RESULT=0
+- if [[ $PUBLISH_BINARY == true ]]; then INSTALL_RESULT=$(npm install --fallback-to-build=false > /dev/null)$? || true; fi;
+- if [[ $INSTALL_RESULT != 0 ]]; then echo "returned $INSTALL_RESULT";node-pre-gyp unpublish;false; fi
+- node-pre-gyp clean
+
+after_success:
+- node-pre-gyp info
