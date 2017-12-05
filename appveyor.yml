@@ -18,8 +18,6 @@ environment:
   node_pre_gyp_secretAccessKey:
     secure: HYbeKrr1nX4D3a2aFmWv+qcyh3+q8wGM+mRtLdbMiUuGGPhfJw/N253915UPSGjx
   matrix:
-    - nodejs_version: 0.12
-      msvs_toolset: 12
     - nodejs_version: 4
       msvs_toolset: 12
     - nodejs_version: 5
