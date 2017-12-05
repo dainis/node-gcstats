@@ -118,6 +118,10 @@ static void asyncCB(uv_async_t *handle) {
 	Local<Object> diffStats = Nan::New<Object>();
 	formatStatDiff(diffStats, data->before, data->after);
 
+	Nan::Set(obj, Nan::New("startTime").ToLocalChecked(),
+		Nan::New<Number>(static_cast<double>(data->gcStartTime)));
+	Nan::Set(obj, Nan::New("endTime").ToLocalChecked(),
+		Nan::New<Number>(static_cast<double>(data->gcEndTime)));
 	Nan::Set(obj, Nan::New("pause").ToLocalChecked(),
 		Nan::New<Number>(static_cast<double>(data->gcEndTime - data->gcStartTime)));
 	Nan::Set(obj, Nan::New("pauseMS").ToLocalChecked(),

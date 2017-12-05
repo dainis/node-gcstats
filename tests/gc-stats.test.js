@@ -1,7 +1,7 @@
 var GCStats = require('../'),
 	should = require('should'),
 	semver = require('semver'),
-	topLevelKeys = ['pause', 'pauseMS', 'gctype', 'before', 'after', 'diff'],
+	topLevelKeys = ['startTime', 'endTime', 'pause', 'pauseMS', 'gctype', 'before', 'after', 'diff'],
 	entryKeys = ['totalHeapSize', 'usedHeapSize', 'totalHeapExecutableSize', 'heapSizeLimit'];
 
 if(semver.gte(semver.clean(process.version), '0.11.0')) {
