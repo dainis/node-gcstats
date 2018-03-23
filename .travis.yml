@@ -1,11 +1,10 @@
 language: node_js
-
 node_js:
-- "4"
-- "5"
-- "6"
-- "8"
-- "9"
+- '4'
+- '5'
+- '6'
+- '8'
+- '9'
 
 env:
   matrix:
@@ -45,3 +44,13 @@ script:
 
 after_success:
 - node-pre-gyp info
+
+deploy:
+  provider: npm
+  email: dainis@tillers.lv
+  api_key:
+    secure: a+dk0cdjYE8Kd3t8HiIybKJFqIsWSAVWy6w8Af2vzmiADwQBTdr1krRvg78srjJDtDdjtHuFsKqo7UdSAQsVsP/r9dW4fSbbljARpDXlWfEtgqyygOsdPwx8/FPkmQgBTfqJ5888Op7BHfNsxF9pW6To5ScUIonopaOjyvDQCkQ=
+  on:
+    repo: dainis/node-gcstats
+    branch: master
+    condition: ${TRAVIS_COMMIT_MESSAGE#*'[publish npm]'}" != "$TRAVIS_COMMIT_MESSAGE
