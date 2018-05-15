@@ -12,11 +12,12 @@
     "install": "node-pre-gyp install --fallback-to-build",
     "test": "mocha --expose-gc tests",
     "example": "node --expose-gc example.js",
-    "prepublish": "npm ls"
+    "prepublish": "npm ls",
+    "retire": "retire --node --package --verbose --nocache --severity high"
   },
   "dependencies": {
     "nan": "^2.6.2",
-    "node-pre-gyp": "^0.7.0"
+    "node-pre-gyp": "^0.10.0"
   },
   "gypfile": true,
   "devDependencies": {
@@ -24,7 +25,8 @@
     "mocha": "^2.5.3",
     "node-gyp": "^3.6.2",
     "semver": "^5.3.0",
-    "should": "^7.1.0"
+    "should": "^7.1.0",
+    "retire": "^1.6.0"
   },
   "bundledDependencies": [
     "node-pre-gyp"
