@@ -21,7 +21,21 @@ struct HeapData {
 	int        gctype;
 };
 
-static Nan::Callback* afterGCCallback;
+class GCResponseResource : public Nan::AsyncResource {
+ public:
+	GCResponseResource(Local<Function> callback_)
+		: Nan::AsyncResource("nan:test.DelayRequest") {
+			callback.Reset(callback_);
+		}
+
+	~GCResponseResource() {
+		callback.Reset();
+	}
+
+	Nan::Persistent<Function> callback;
+};
+
+static GCResponseResource* asnycResource;
 
 static HeapStatistics beforeGCStats;
 uint64_t gcStartTime;
@@ -133,7 +147,9 @@ static void asyncCB(uv_async_t *handle) {
 
 	Local<Value> arguments[] = {obj};
 
-	afterGCCallback->Call(1, arguments);
+	Local<Function> callback = Nan::New(asnycResource->callback);
+	v8::Local<v8::Object> target = Nan::New<v8::Object>();
+	asnycResource->runInAsyncScope(target, callback, 1, arguments);
 
 	delete data->before;
 	delete data->after;
@@ -171,8 +187,8 @@ static NAN_METHOD(AfterGC) {
 		return Nan::ThrowError("Callback is required");
 	}
 
-	Local<Function> callbackHandle = info[0].As<Function>();
-	afterGCCallback = new Nan::Callback(callbackHandle);
+	Local<Function> cb = Nan::To<Function>(info[0]).ToLocalChecked();
+	asnycResource = new GCResponseResource(cb);
 
 	Nan::AddGCEpilogueCallback(afterGC);
 }

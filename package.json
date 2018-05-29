@@ -15,7 +15,7 @@
     "prepublish": "npm ls"
   },
   "dependencies": {
-    "nan": "^2.6.2",
+    "nan": "^2.10.0",
     "node-pre-gyp": "^0.7.0"
   },
   "gypfile": true,
