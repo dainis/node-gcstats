@@ -12,18 +12,19 @@
     "install": "node-pre-gyp install --fallback-to-build",
     "test": "mocha --expose-gc tests",
     "example": "node --expose-gc example.js",
-    "prepublish": "npm ls"
+    "prepublish": "npm ls",
+    "build": "node-pre-gyp build",
+    "pretest": "npm run build"
   },
   "dependencies": {
     "nan": "^2.10.0",
-    "node-pre-gyp": "^0.7.0"
+    "node-pre-gyp": "^0.10.0"
   },
   "gypfile": true,
   "devDependencies": {
-    "aws-sdk": "^2.75.0",
-    "mocha": "^2.5.3",
-    "node-gyp": "^3.6.2",
-    "semver": "^5.3.0",
+    "aws-sdk": "^2.247.1",
+    "mocha": "^5.2.0",
+    "semver": "^5.5.0",
     "should": "^7.1.0"
   },
   "bundledDependencies": [
