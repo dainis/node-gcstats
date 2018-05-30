@@ -36,7 +36,6 @@ install:
 before_script:
 - if [[ $PUBLISH_BINARY == true ]]; then node-pre-gyp package publish; fi;
 - node-pre-gyp clean
-- node-gyp clean
 
 script:
 - INSTALL_RESULT=0
