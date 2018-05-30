@@ -1,6 +1,6 @@
 {
   "name": "gc-stats",
-  "version": "1.1.1",
+  "version": "1.2.0",
   "description": "Exposes node v8 garbage collection stats",
   "main": "index.js",
   "repository": "git@github.com:dainis/node-gcstats.git",
