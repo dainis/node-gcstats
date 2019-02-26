@@ -18,13 +18,14 @@
     "clean": "node-pre-gyp clean"
   },
   "dependencies": {
-    "nan": "^2.10.0",
-    "node-pre-gyp": "^0.11.0"
+    "bindings": "^1.4.0",
+    "nan": "^2.10.0"
   },
   "gypfile": true,
   "devDependencies": {
     "aws-sdk": "^2.247.1",
     "mocha": "^5.2.0",
+    "node-pre-gyp": "^0.11.0",
     "semver": "^5.5.0",
     "should": "^7.1.0"
   },
@@ -33,7 +34,7 @@
   ],
   "binary": {
     "module_name": "gcstats",
-    "module_path": "./build/{module_name}/v{version}/{configuration}/{node_abi}-{platform}-{arch}/",
+    "module_path": "./lib/binding/{node_abi}-{platform}-{arch}/",
     "remote_path": "./{module_name}/v{version}/{configuration}/",
     "package_name": "{node_abi}-{platform}-{arch}.tar.gz",
     "host": "https://node-binaries.s3.amazonaws.com"
