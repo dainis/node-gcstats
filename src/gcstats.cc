@@ -1,4 +1,5 @@
 #include <nan.h>
+#include <math.h>
 
 using namespace v8;
 
@@ -139,7 +140,7 @@ static void asyncCB(uv_async_t *handle) {
 	Nan::Set(obj, Nan::New("pause").ToLocalChecked(),
 		Nan::New<Number>(static_cast<double>(data->gcEndTime - data->gcStartTime)));
 	Nan::Set(obj, Nan::New("pauseMS").ToLocalChecked(),
-		Nan::New<Number>(static_cast<double>((data->gcEndTime - data->gcStartTime) / 1000000)));
+		Nan::New<Number>(round((data->gcEndTime - data->gcStartTime) / 1000000.0)));
 	Nan::Set(obj, Nan::New("gctype").ToLocalChecked(), Nan::New<Number>(data->gctype));
 	Nan::Set(obj, Nan::New("before").ToLocalChecked(), beforeGCStats);
 	Nan::Set(obj, Nan::New("after").ToLocalChecked(), afterGCStats);
