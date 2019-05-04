@@ -25,7 +25,7 @@
   "devDependencies": {
     "aws-sdk": "^2.449.0",
     "mocha": "^6.1.4",
-    "semver": "^6.0.0",
+    "semver": "^5.7.0",
     "should": "^13.2.3"
   },
   "bundledDependencies": [
