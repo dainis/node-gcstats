@@ -8,6 +8,22 @@ if(semver.gte(semver.clean(process.version), '0.11.0')) {
 	entryKeys.push('totalPhysicalSize'); //this v8 property became available with node 0.11+
 }
 
+if(semver.gte(semver.clean(process.version), '4.0.0')) {
+	entryKeys.push('totalAvailableSize'); //this v8 property became available with node 4+
+}
+
+//this v8 properties became available with node 7+
+if(semver.gte(semver.clean(process.version), '7.0.0')) {
+	entryKeys.push('mallocedMemory'); 
+	entryKeys.push('peakMallocedMemory'); 
+}
+
+//this v8 properties became available with node 10+
+if(semver.gte(semver.clean(process.version), '10.0.0')) {
+	entryKeys.push('numberOfNativeContexts'); 
+	entryKeys.push('numberOfDetachedContexts');
+}
+
 describe('gc-stats', function() {
 	var gcStats;
 

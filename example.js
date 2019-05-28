@@ -13,7 +13,7 @@ setInterval(function(){
 }, 10);
 
 setInterval(function() {
-	for (;t.length > 0;) {
+	while (t.length > 0) {
 		t.pop();
 	}
 });
