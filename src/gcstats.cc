@@ -12,6 +12,8 @@ struct HeapInfo {
 	size_t totalAvailableSize;
 	size_t mallocedMemory;
 	size_t peakMallocedMemory;
+	size_t numberOfNativeContexts;
+	size_t numberOfDetachedContexts;
 };
 
 struct HeapData {
@@ -64,6 +66,11 @@ static void copyHeapStats(HeapStatistics* stats, HeapInfo* info) {
 	info->mallocedMemory = stats->malloced_memory();
 	info->peakMallocedMemory = stats->peak_malloced_memory();
 	#endif
+
+	#if NODE_MODULE_VERSION >= NODE_10_0_MODULE_VERSION
+	info->numberOfNativeContexts = stats->number_of_native_contexts();
+	info->numberOfDetachedContexts = stats->number_of_detached_contexts();
+	#endif
 }
 
 static void formatStats(Local<Object> obj, HeapInfo* info) {
@@ -83,6 +90,11 @@ static void formatStats(Local<Object> obj, HeapInfo* info) {
 	#if NODE_MODULE_VERSION >= NODE_7_0_MODULE_VERSION
 	Nan::Set(obj, Nan::New("mallocedMemory").ToLocalChecked(), Nan::New<Number>(info->mallocedMemory));
 	Nan::Set(obj, Nan::New("peakMallocedMemory").ToLocalChecked(), Nan::New<Number>(info->peakMallocedMemory));
+	#endif
+
+	#if NODE_MODULE_VERSION >= NODE_10_0_MODULE_VERSION
+	Nan::Set(obj, Nan::New("numberOfNativeContexts").ToLocalChecked(), Nan::New<Number>(info->numberOfNativeContexts));
+	Nan::Set(obj, Nan::New("numberOfDetachedContexts").ToLocalChecked(), Nan::New<Number>(info->numberOfDetachedContexts));
 	#endif
 }
 
@@ -111,6 +123,13 @@ static void formatStatDiff(Local<Object> obj, HeapInfo* before, HeapInfo* after)
 		static_cast<double>(after->mallocedMemory) - static_cast<double>(before->mallocedMemory)));
 	Nan::Set(obj, Nan::New("peakMallocedMemory").ToLocalChecked(), Nan::New<Number>(
 		static_cast<double>(after->peakMallocedMemory) - static_cast<double>(before->peakMallocedMemory)));
+	#endif
+
+	#if NODE_MODULE_VERSION >= NODE_10_0_MODULE_VERSION
+	Nan::Set(obj, Nan::New("numberOfNativeContexts").ToLocalChecked(), Nan::New<Number>(
+		static_cast<double>(after->numberOfNativeContexts) - static_cast<double>(before->numberOfNativeContexts)));
+	Nan::Set(obj, Nan::New("numberOfDetachedContexts").ToLocalChecked(), Nan::New<Number>(
+		static_cast<double>(after->numberOfDetachedContexts) - static_cast<double>(before->numberOfDetachedContexts)));
 	#endif
 }
 
