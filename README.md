@@ -64,6 +64,10 @@ This will print blobs like this whenever a GC happened:
 * endTime: Nanoseconds for end, using hrtime()
 * pause: Nanoseconds from start to end of GC using hrtime()
 * pauseMS: pause expressed in milliseconds
+* mallocedMemory
+* peakMallocedMemory
+* numberOfNativeContexts
+* numberOfDetachedContexts
 * gctype can have the following values([v8 source](https://github.com/nodejs/node/blob/554fa24916c5c6d052b51c5cee9556b76489b3f7/deps/v8/include/v8.h#L6137-L6144)):
   * 1: Scavenge (minor GC)
   * 2: Mark/Sweep/Compact (major GC)
