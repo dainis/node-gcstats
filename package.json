@@ -19,12 +19,12 @@
   },
   "dependencies": {
     "nan": "^2.13.2",
-    "node-pre-gyp": "^0.13.0"
+    "node-pre-gyp": "^0.14.0"
   },
   "gypfile": true,
   "devDependencies": {
     "aws-sdk": "^2.449.0",
-    "mocha": "^6.2.0",
+    "mocha": "^7.1.1",
     "semver": "^5.7.0",
     "should": "^13.2.3"
   },
