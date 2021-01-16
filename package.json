@@ -18,14 +18,14 @@
     "clean": "node-pre-gyp clean"
   },
   "dependencies": {
-    "nan": "^2.13.2",
-    "node-pre-gyp": "^0.13.0"
+    "nan": "^2.14.2",
+    "node-pre-gyp": "^0.17.0"
   },
   "gypfile": true,
   "devDependencies": {
-    "aws-sdk": "^2.449.0",
-    "mocha": "^6.2.3",
-    "semver": "^5.7.0",
+    "aws-sdk": "^2.828.0",
+    "mocha": "^8.2.1",
+    "semver": "^7.3.4",
     "should": "^13.2.3"
   },
   "bundledDependencies": [
