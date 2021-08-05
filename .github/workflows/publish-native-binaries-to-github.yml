@@ -1,0 +1,62 @@
+# This workflow will prebuild native binaries for supported NodeJS versions, and add them to the Github release that triggered the workflow
+
+name: Add native binaries to release
+
+on:
+  release:
+    types: [created]
+  workflow_dispatch:
+
+jobs:
+  augment-release:
+    runs-on: ${{ matrix.os }}
+    strategy:
+      matrix:
+        node-version: [10.x, 12.x, 14.x]
+        os: [ubuntu-latest, macos-latest, windows-latest]
+    steps:
+      - uses: actions/checkout@v2
+      - name: Use Node.js ${{ matrix.node-version }}
+        uses: actions/setup-node@v1
+        with:
+          node-version: ${{ matrix.node-version }}
+      - name: patch node gyp on windows to support Visual Studio 2019
+        if: matrix.os == 'windows-latest'
+        shell: powershell
+        run: |
+          npm install --global node-gyp@5.1.1
+          npm prefix -g | % {npm config set node_gyp "$_\node_modules\node-gyp\bin\node-gyp.js"}
+      - name: build using node-pre-gyp
+        run: |
+          npm install --build-from-source
+          npx node-pre-gyp rebuild
+          npx node-pre-gyp package
+      - name: Upload native binaries for Node ${{ matrix.node-version }} for ${{ matrix.os }}
+        uses: csexton/release-asset-action@v2
+        with:
+          pattern: "build/stage/*.tar.gz"
+          github-token: ${{ secrets.GITHUB_TOKEN }}
+          release-url: ${{ github.event.release.upload_url }}
+
+  alpine-release:
+    runs-on: ubuntu-latest
+    strategy:
+      matrix:
+        node-version: [12, 14]
+    container: node:${{ matrix.node-version }}-alpine3.12
+    steps:
+      - uses: actions/checkout@v2
+      - name: install build deps
+        run: |
+          apk add g++ make python2
+      - name: build using node-pre-gyp
+        run: |
+          npm install
+          npx node-pre-gyp rebuild
+          npx node-pre-gyp package
+      - name: Upload native binaries for Node ${{ matrix.node-version }} for alpine
+        uses: csexton/release-asset-action@v2
+        with:
+          pattern: "build/stage/*.tar.gz"
+          github-token: ${{ secrets.GITHUB_TOKEN }}
+          release-url: ${{ github.event.release.upload_url }}
