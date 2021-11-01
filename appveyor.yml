@@ -12,15 +12,13 @@ environment:
   node_pre_gyp_secretAccessKey:
     secure: HYbeKrr1nX4D3a2aFmWv+qcyh3+q8wGM+mRtLdbMiUuGGPhfJw/N253915UPSGjx
   matrix:
-    - nodejs_version: 6
-    - nodejs_version: 7
-    - nodejs_version: 8
-    - nodejs_version: 9
     - nodejs_version: 10
     - nodejs_version: 11
     - nodejs_version: 12
     - nodejs_version: 13
     - nodejs_version: 14
+    - nodejs_version: 15
+    - nodejs_version: 16
     
 install:
   - ps: Start-FileDownload 'https://github.com/mapbox/ci-scripts/raw/v1.1.0/node/ci-cpp.bat' -FileName ci.bat
