@@ -1,10 +1,7 @@
 "use strict";
 
 var gcEmitter,
-  binary = require('node-pre-gyp'),
-  path = require('path'),
-  binding_path = binary.find(path.resolve(path.join(__dirname,'./package.json'))),
-  gcstats = require(binding_path),
+  gcstats = require('node-gyp-build')(__dirname),
   EventEmitter = require('events').EventEmitter;
 
 function gcStats() {
