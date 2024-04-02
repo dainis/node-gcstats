@@ -1,3 +1,8 @@
+# NB!
+
+V1.4.0 was using s3 for prebuilt binaries that is not associated with project anymore
+use v1.4.0 at your own risk
+
 # GCStats
 [![Build Status](https://travis-ci.org/dainis/node-gcstats.svg?branch=master)](https://travis-ci.org/dainis/node-gcstats) [![Build status](https://ci.appveyor.com/api/projects/status/oeu171tgxbsac88q/branch/master?svg=true)](https://ci.appveyor.com/project/dainis/node-gcstats/branch/master)
 
